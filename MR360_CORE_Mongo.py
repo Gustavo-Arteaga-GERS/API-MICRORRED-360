@@ -5,8 +5,19 @@ import pandas as pd
 import random
 import datetime
 from pulp import *
+import gurobipy as gp
+import pymongo
+from pymongo import MongoClient
 
 app = Flask(__name__)
+
+# database MONGODB
+MONGO_URI = "mongodb://localhost:27017/"
+MONGO_DATABASE = "MR360_DB"
+MONGO_COLLECTION ="profiles"
+client = pymongo.MongoClient(MONGO_URI)
+dataBase_ = client[MONGO_DATABASE]
+collection_ = dataBase_[MONGO_COLLECTION]
 
 @app.route("/calculator" , methods = ['POST'])
 def microgrid():
@@ -149,44 +160,93 @@ def microgrid():
     M = 1e6
     FE = 0.126
 
-    # load_and_solar_profile_reading_(local_database):
+    # load_and_solar_profile_reading_from MONGODB:
     # pv_profile_according_to_the_radiation_level_entered:
+    Pv1kw_tmp = []
     if radiation_level == 1:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_1']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Solar_1"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp)
     elif radiation_level == 2:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_2']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Solar_2"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp)
     elif radiation_level == 3:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_3']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Solar_3"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp)
     elif radiation_level == 4:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_4']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Solar_4"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp)
     elif radiation_level == 5:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_5']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Solar_5"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp)
     elif radiation_level == 6:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_6']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Solar_6"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp)
     elif radiation_level == 7:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_7']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Solar_7"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp)
     elif radiation_level == 8:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_8']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Solar_8"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp) 
     elif radiation_level == 9:
-        Pv1kw = pd.read_csv('profiles.csv', sep=",", usecols = ['Solar_9']).dropna().to_numpy()
-
+        for ind in collection_.find():
+            temp = ind["Solar_9"]
+            Pv1kw_tmp.append(temp)
+        Pv1kw = np.array(Pv1kw_tmp)
+        
     # load_profile_according_to_the_entered_economic_level:
+    Dem_tmp = []
     if economic_level == 1:
-        Dem = pd.read_csv('profiles.csv', sep=",", usecols = ['Demand_1']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Demand_1"]
+            Dem_tmp.append(temp)
+        Dem = np.array(Dem_tmp)
     elif economic_level == 2:
-        Dem = pd.read_csv('profiles.csv', sep=",", usecols = ['Demand_2']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Demand_2"]
+            Dem_tmp.append(temp)
+        Dem = np.array(Dem_tmp)
     elif economic_level == 3:
-        Dem = pd.read_csv('profiles.csv', sep=",", usecols = ['Demand_3']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Demand_3"]
+            Dem_tmp.append(temp)
+        Dem = np.array(Dem_tmp)
     elif economic_level == 4:
-        Dem = pd.read_csv('profiles.csv', sep=",", usecols = ['Demand_4']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Demand_4"]
+            Dem_tmp.append(temp)
+        Dem = np.array(Dem_tmp)
     elif economic_level == 5:
-        Dem = pd.read_csv('profiles.csv', sep=",", usecols = ['Demand_5']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Demand_5"]
+            Dem_tmp.append(temp)
+        Dem = np.array(Dem_tmp)
     elif economic_level == 6:
-        Dem = pd.read_csv('profiles.csv', sep=",", usecols = ['Demand_6']).dropna().to_numpy()
+        for ind in collection_.find():
+            temp = ind["Demand_6"]
+            Dem_tmp.append(temp)
+        Dem = np.array(Dem_tmp)
 
     # line_of_code_with_preset_order_of-data:
-    myOrder = pd.read_csv('profiles.csv', sep=",", usecols = ['Order']).dropna().to_numpy().tolist()
-    myOrder = sum(myOrder, [])
+    myOrder = []
+    for ind in collection_.find():
+        temp = ind["Order"]
+        myOrder.append(temp)
 
     #  Function_create_failure_in_power_grid:
     def createFailure(h, n, dt):
@@ -201,9 +261,24 @@ def microgrid():
     vFailure, dateFailure, h, start_ = createFailure(hoursFailure, len(Dem), deltaT)
 
     # logic_for_indexing_the_failure_date_according_to_the_annual_start_time:
-    dailyProfile = pd.read_csv('profiles.csv', sep=",", usecols = ['Day']).dropna().to_numpy()
-    monthProfile = pd.read_csv('profiles.csv', sep=",", usecols = ['Month']).dropna().to_numpy()
-    hourlyProfile = pd.read_csv('profiles.csv', sep=",", usecols = ['Hour']).dropna().to_numpy()
+    dailyProfile_tmp = []
+    for ind in collection_.find():
+        temp = ind["Day"]
+        dailyProfile_tmp.append(temp)
+    dailyProfile = np.array(dailyProfile_tmp)
+
+    monthProfile_tmp = []
+    for ind in collection_.find():
+        temp = ind["Month"]
+        monthProfile_tmp.append(temp)
+    monthProfile = np.array(monthProfile_tmp)
+
+    hourlyProfile_tmp = []
+    for ind in collection_.find():
+        temp = ind["Hour"]
+        hourlyProfile_tmp.append(temp)
+    hourlyProfile = np.array(hourlyProfile_tmp)
+
     day = int(dailyProfile[start_])
     month = int(monthProfile[start_])
     hour = int(hourlyProfile[start_])
@@ -291,7 +366,8 @@ def microgrid():
     prob += lpSum([Cgrid * Pgrid[i] * deltaT for i in horizon]) + Cpv * Pinst + Cpvh * Pinsth + Ckwh * Ebat + Cinvc * Pinvc - lpSum([Cout * Pout[i] * deltaT for i in horizon])
 
     # optimization_problem_solution:
-    prob.solve(PULP_CBC_CMD(fracGap = 0.00001, maxSeconds = 120, threads = None))
+    #prob.solve(PULP_CBC_CMD(fracGap = 0.00001, maxSeconds = 120, threads = None))
+    prob.solve(GUROBI_CMD())
 
     # re-defining_time-dependent_variables_(empty_initial_state):
     Pgrid_ = []
