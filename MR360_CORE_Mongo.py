@@ -5,7 +5,6 @@ import pandas as pd
 import random
 import datetime
 from pulp import *
-import gurobipy as gp
 import pymongo
 from pymongo import MongoClient
 
@@ -366,8 +365,7 @@ def microgrid():
     prob += lpSum([Cgrid * Pgrid[i] * deltaT for i in horizon]) + Cpv * Pinst + Cpvh * Pinsth + Ckwh * Ebat + Cinvc * Pinvc - lpSum([Cout * Pout[i] * deltaT for i in horizon])
 
     # optimization_problem_solution:
-    #prob.solve(PULP_CBC_CMD(fracGap = 0.00001, maxSeconds = 120, threads = None))
-    prob.solve(GUROBI_CMD())
+    prob.solve(PULP_CBC_CMD(fracGap = 0.00001, maxSeconds = 120, threads = None))
 
     # re-defining_time-dependent_variables_(empty_initial_state):
     Pgrid_ = []
